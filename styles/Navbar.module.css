@@ -1,0 +1,29 @@
+
+
+.navbar {
+	display: flex;
+	/* justify-content: space-between; */
+
+	/* width 80% on pc 100% on mobile */
+	width: 80%;
+
+	/* media select mobile */
+	@media screen and (max-width: 750px) {
+		width: 100%;
+	}
+
+	padding: 2rem 4rem 0.8rem 4rem;
+	gap: 2rem;
+	margin-bottom: 4rem;
+
+	/* align to right */
+	justify-content: flex-end;
+
+}
+
+
+
+.alchemy_logo{
+	width: 8rem;
+	cursor: pointer;
+}
