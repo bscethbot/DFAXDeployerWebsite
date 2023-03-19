@@ -1,1 +1,1 @@
-# nfts-gallery
+DFAX frontend for projects
