@@ -69,6 +69,9 @@ export default function DFAXDeployer({}) {
   const [tokenAddress, setTokenAddress] = useState('');
   const [sourceChainBridge, setSourceChainBridge] = useState('');
 
+  // logo url
+  const [logoUrl, setLogoUrl] = useState('');
+
   // salt
   const [salt, setSalt] = useState('');
 
@@ -750,6 +753,20 @@ function DestChainForm({ isTestnet, destchainInfo, setDestchainInfo }) {
 
           <ChainSelect chain={chain} setChain={setChain} isTestnet={isTestnet}/>
         </div>
+
+        <div className={styles.logo_container}>
+          <input
+            value={logoUrl}
+            onChange={(e) => {
+              setLogoUrl(e.target.value);
+            }}
+            placeholder="TOKEN LOGO URL"
+          ></input>
+
+        </div>
+        
+
+
 
         {/*  destination token */}
 
