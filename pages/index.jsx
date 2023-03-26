@@ -3,10 +3,10 @@ import DFAXDeployer from "../components/DFAXDeployer";
 
 export default function Home() {
   return (
-    <div>
-      <main className={styles.main}>
+    <div className={styles.main}>
+
         <DFAXDeployer />
-      </main>
+      
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 .navbar {
 	display: flex;
-	/* justify-content: space-between; */
+	/* justify-content: flex-end; */
 
 	/* width 80% on pc 100% on mobile */
 	width: 80%;
@@ -10,7 +10,10 @@
 	/* media select mobile */
 	@media screen and (max-width: 750px) {
 		width: 100%;
-	}
+		/* padding: 1rem 2rem 0.4rem 2rem; */
+		gap: 1rem;
+		margin-bottom: 2rem;
+	  }
 
 	padding: 2rem 4rem 0.8rem 4rem;
 	gap: 2rem;

@@ -2,8 +2,13 @@ import { ethers } from "ethers";
 import styles from "../styles/NftGallery.module.css";
 
 const checkContractAddress = async (provider, contractAddress) => {
+  // chainid from provider
 
-  const chain=provider._network.name
+
+
+  const chain=provider._network.chainId
+
+  console.log(provider)
 
   if (!provider) {
     console.error(`Provider not found for chain: ${chain}`);
@@ -20,57 +25,62 @@ const checkContractAddress = async (provider, contractAddress) => {
   }
 };
 
-const monitorContractAddresses = (providerDict,chains,contractaddresses,setIsDeployedByChain,setStatus) => {
-  const intervalIds = {};
-  let clearedintervals=0
-  for (const [index, chain] of chains.entries()) {
-    intervalIds[chain] = setInterval(async () => {
+const monitorContractAddresses = (
+  providerDict,
+  chains,
+  contractaddresses,
+  setIsDeployedByChain,
+  setStatus
+) => {
+  return new Promise((resolve) => {
+    const intervalIds = {};
+    let clearedIntervals = 0;
 
-
-      const contractAddress = contractaddresses[index];
-      const provider = providerDict[chain];
-      const exists = await checkContractAddress(provider, contractAddress);
-
-      if (exists) {
-      console.log(`Contract address ${contractAddress} exists on chain ${chain}`);
-      setIsDeployedByChain((prevState) => ({
-        ...prevState,
-        [chain]: exists,
-      })
-    
+    for (const [index, chain] of chains.entries()) {
+      intervalIds[chain] = setInterval(async () => {
+        const contractAddress = contractaddresses[index];
+        const provider = providerDict[chain];
+        console.log('check on' + chain)
       
-      );
+        const exists = await checkContractAddress(provider, contractAddress);
 
-      clearInterval(intervalIds[chain]);
-      clearedintervals+=1
-      // all intervals are clears
-      if (clearedintervals==chains.length) {
-        console.log('no more intervals')
-        setStatus('All Chains Deployed. Refer to the table below for deployed information.');
-      }
+        if (exists) {
+          console.log(
+            `Contract address ${contractAddress} exists on chain ${chain}`
+          );
+          setIsDeployedByChain((prevState) => ({
+            ...prevState,
+            [chain]: exists,
+          }));
+
+          clearInterval(intervalIds[chain]);
+          clearedIntervals += 1;
+
+          if (clearedIntervals === chains.length) {
+            console.log("no more intervals");
+            setStatus(
+              "All Chains Deployed. Refer to the table below for deployed information. You can also click on the 'List on Website' button to list your token on the website."
+            );
+            resolve(true);
+          }
+        }
+      }, 1000);
     }
 
-
-    }, 1000);
-
-
-
-
-
-  }
-
-  return () => {
-    for (const chain of chains) {
-      clearInterval(intervalIds[chain]);
-    }
-  };
+  
+  });
 };
 
-function TransactionButton({providerDict,chain,tokenaddress,deployeraddress,salt,destchainInfo,computedAddress,setStatus,isDeployedByChain,setIsDeployedByChain,}) {
+
+
+
+
+
+function TransactionButton({providerDict,chain,tokenaddress,deployeraddress,salt,destchainInfo,computedAddress,setStatus,isDeployedByChain,setIsDeployedByChain,setSignPayload}) {
   
+  const allparams=[providerDict,chain,tokenaddress,deployeraddress,salt,destchainInfo,computedAddress,setStatus,isDeployedByChain,setIsDeployedByChain,setSignPayload]
 
-
-  async function sendTransaction(providerDict,chain,tokenaddress,deployeraddress,salt,destchainInfo,computedAddress,setStatus,isDeployedByChain,setIsDeployedByChain) {
+  async function sendTransaction(providerDict,chain,tokenaddress,deployeraddress,salt,destchainInfo,computedAddress,setStatus,isDeployedByChain,setIsDeployedByChain,setSignPayload) {
   // compare chain selected and current chain
   // if same chain then send transaction
   // else show error
@@ -79,7 +89,7 @@ function TransactionButton({providerDict,chain,tokenaddress,deployeraddress,salt
 
   let allchains =   destchainInfo.map(destChainInfoItem => destChainInfoItem[0]);
   let alldestchains=destchainInfo.map(destChainInfoItem => destChainInfoItem[0]);
-  allchains.push(chain);
+  allchains.unshift(chain);
   console.log('all chains are')
   console.log(allchains)
   let uniqueChains = [...new Set(allchains)];
@@ -97,12 +107,13 @@ function TransactionButton({providerDict,chain,tokenaddress,deployeraddress,salt
       // check if window.ethereum is available
   if (!window.ethereum) {
           console.log("MetaMask not detected!");
+          setStatus("MetaMask not detected!");
           return;
         }
 
   // const chainvalue=chain['chain']
   const chainIds = {
-      // ETH_GOERLI: "5",
+      ETHGOERLI: "5",
       BNBTEST: "97",
       FTMTEST: "4002",
       AVAXTEST: "43113"
@@ -112,7 +123,7 @@ function TransactionButton({providerDict,chain,tokenaddress,deployeraddress,salt
   // factory based on anycall
   const factory = {
     "BNBTEST": "0x142726ACE295FcA5b27f0B9f6986157a19FA41F0",
-    // "ETH_GOERLI": "0x142726ACE295FcA5b27f0B9f6986157a19FA41F0",
+    "ETHGOERLI": "0x142726ACE295FcA5b27f0B9f6986157a19FA41F0",
     "FTMTEST":"0x142726ACE295FcA5b27f0B9f6986157a19FA41F0",
     "AVAXTEST":"0x142726ACE295FcA5b27f0B9f6986157a19FA41F0"
   }
@@ -275,12 +286,12 @@ function TransactionButton({providerDict,chain,tokenaddress,deployeraddress,salt
   var _peers = alldestchains.map((chain) => {
       return computedAddress[chain][0];
     });
-
+  
 
   // alldestchains add source chain at the start
-  alldestchains.unshift(chain);
+  // alldestchains.unshift(chain);
 
-  const _chainIds = alldestchains.map((chain) => {
+  const _chainIds = allchains.map((chain) => {
     return chainIds[chain];
   });
 
@@ -332,12 +343,23 @@ function TransactionButton({providerDict,chain,tokenaddress,deployeraddress,salt
 
 
   // send tx with value totalFee set status if they reject
+  let tx
+  try{
+   tx = await factorycontract.createAndSetPeers(tokenaddress,tokenData,_chainIds,_peers,anyCallFee, { value: totalFee });
+  }
+  catch(error){
+    console.log(error.message)
 
-
-  const tx = await factorycontract.createAndSetPeers(tokenaddress,tokenData,_chainIds,_peers,anyCallFee, { value: totalFee });
-
+    if (error.message.includes('insufficient funds for gas * price + value')) {
+    setStatus("insufficient funds for gas");
+  }
+    return;
+  }
   // if tx successful
   console.log("tx sent");
+
+  // set status to tx sent
+  setStatus("Tx Sent. Waiting for tx to be mined... 👇");
 
 
   // wait for tx to be mined
@@ -354,12 +376,69 @@ function TransactionButton({providerDict,chain,tokenaddress,deployeraddress,salt
 
   if (status === 1) {
     console.log("tx success");
-    setStatus("Tx Success. Waiting for other chains to deploy bridges... 👇");
+    setStatus("Tx Success. Waiting for other chains to deploy bridges... Check below for deployment status👇");
 
     console.log('checking if deployed on other chains')
     console.log(_peers)
-    monitorContractAddresses(providerDict,alldestchains,_peers,setIsDeployedByChain,setStatus)
+    const otherchainsuccess=await monitorContractAddresses(providerDict,allchains,_peers,setIsDeployedByChain,setStatus)
+
+    if (otherchainsuccess){
+      console.log('all bridges deployed')
+      // build out the sign payload
+      const projectName=tokenname+"_"+deployeraddress
+      let config = {};
+      // source chain info
+      config[chainIds[chain]] = {
+        type: "pool",
+        logo: "",
+        token: tokenaddress,
+        name: tokenname,
+        symbol: symbol,
+        decimals: decimals,
+        gateway: computedAddress[chainId]
+      };
+
+
+      for (const chainId of alldestchains) {
+      const gateway = computedAddress[chainId][0];
+
+      config[chainIds[chainId]] = {
+        type: "mintburn",
+        logo: "",
+        token: computedAddress[chainId][2],
+        name: tokenname,
+        symbol: symbol,
+        decimals: decimals,
+        gateway: gateway
+      };
+    }
+
+    // arrange the config in chainid from small to big
+    const sortedConfig = {};
+    Object.keys(config)
+      .sort((a, b) => a - b)
+      .forEach((key) => {
+        sortedConfig[key] = config[key];
+      });
+    config = sortedConfig;
+
+    
+    console.log('final config')
+    console.log(config)
+    const signpayload={
+      "deployer":deployeraddress,
+      "projectName":projectName,
+      "configs":config
+    }
+    console.log('signpayload')
+    setSignPayload(signpayload)
+
+
+
+
   }
+
+
 
 
 
@@ -372,10 +451,10 @@ function TransactionButton({providerDict,chain,tokenaddress,deployeraddress,salt
 
 }
   console.log(chain,tokenaddress,deployeraddress,salt)
-
+  }
   // computedAddress 
   return (
-    <button className={`${computedAddress['BNBTEST']=='' ? styles.buttondisabled :styles.button}`} onClick={()=>sendTransaction(providerDict,chain,tokenaddress,deployeraddress,salt,destchainInfo,computedAddress,setStatus,isDeployedByChain,setIsDeployedByChain)}>Deploy Bridges</button>
+    <button className={`${computedAddress['BNBTEST']=='' ? styles.buttondisabled :styles.button}`} onClick={()=>sendTransaction(...allparams)}>Deploy Bridges</button>
   );
 }
 

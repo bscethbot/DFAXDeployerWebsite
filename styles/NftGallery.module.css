@@ -7,7 +7,7 @@
     align-items: center;
 
     /* padding top bottom */
-    padding: 5rem 0;
+    /* padding: 5rem 0; */
     /* padding: 0 1.5rem; */
 
     /* padding left right top*/
@@ -42,6 +42,8 @@
   /* center text */
   
 }
+
+
 
 .status{
     width: 50%;
@@ -176,10 +178,17 @@ border-bottom: 2px solid rgba(0, 98, 255, 0.214);
 
 }
 
+
+
 .info_table {
     border-collapse: collapse;
     width: 100%;
     margin: 1rem 0;
+    table-layout: fixed; 
+    /* overflow-x: auto;
+    -webkit-overflow-scrolling: touch; */
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .info_table th,
@@ -187,6 +196,8 @@ border-bottom: 2px solid rgba(0, 98, 255, 0.214);
     padding: 0.75rem;
     text-align: left;
     border-bottom: 1px solid #dee2e6;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .info_table th {
@@ -213,6 +224,7 @@ border-bottom: 2px solid rgba(0, 98, 255, 0.214);
 }
 
 .info_box{
+    width: 100%;
     background-color: rgb(244, 244, 244);
     border-radius: 0 0 6px 6px;
     padding: .7rem 1rem 1rem 1rem;
@@ -231,6 +243,7 @@ border-bottom: 2px solid rgba(0, 98, 255, 0.214);
     margin-bottom: .5rem;
     /* text center */
     text-align: center;
+    width: 100%;
     
 }
 
@@ -311,27 +324,4 @@ border-bottom: 2px solid rgba(0, 98, 255, 0.214);
 }
 
 
-@media screen and (max-width: 992px){
-    .card_container{
-        width: 30%;
-    
-    } 
-}
-@media screen and (max-width: 750px){
-    .card_container{
-        width: 40%;
 
-    
-    } 
-}
-@media screen and (max-width: 560px){
-    .nfts_display{
-       
-        max-width: 100%;
-      
-    }
-   
-    .card_container{
-        width: 80%;
-    } 
-}

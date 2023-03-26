@@ -4,6 +4,7 @@ import { useAccount } from "wagmi";
 import TransactionButton from "./TransactionButton";
 import { ethers } from "ethers";
 import InfoBox from "./InfoBox";
+import SubmitConfigButton from "./SubmitConfigButton";
 
 
 
@@ -16,7 +17,7 @@ export default function DFAXDeployer({}) {
   ];
   
   const testnetOptions = [
-    // { value: "ETH_GOERLI", label: "ETH Goerli", selected: false },
+    { value: "ETHGOERLI", label: "ETH Goerli", selected: false },
     { value: "BNBTEST", label: "BNB Testnet", selected: false },
     { value: "FTMTEST", label: "Fantom Testnet", selected: false },
     { value: "AVAXTEST", label: "Avalanche Testnet", selected: false },
@@ -43,25 +44,25 @@ export default function DFAXDeployer({}) {
   // make a dict with provider
   const providerDict={
     "BNBTEST":bscprovider,
-    "ETH_GOERLI":ethgoerliprovider,
+    "ETHGOERLI":ethgoerliprovider,
     "FTMTEST":ftmtestprovider,
     "AVAXTEST":avaxtestprovider}
 
   const factory = {
       "BNBTEST": "0x7C00F080732f53e20351fc853AF82d3Bceb36398",
-      // "ETH_GOERLI": "0xf45dee55de626e06b9af41fe35917a40b9d491d1",
+      "ETHGOERLI": "0x7C00F080732f53e20351fc853AF82d3Bceb36398",
       "FTMTEST":"0x7C00F080732f53e20351fc853AF82d3Bceb36398",
       "AVAXTEST":"0x7C00F080732f53e20351fc853AF82d3Bceb36398"
     }
 
   const anycallFactory={
     "BNBTEST": "0x142726ACE295FcA5b27f0B9f6986157a19FA41F0",
-    // "ETH_GOERLI": "0x142726ACE295FcA5b27f0B9f6986157a19FA41F0",
+    "ETHGOERLI": "0x142726ACE295FcA5b27f0B9f6986157a19FA41F0",
     "FTMTEST":"0x142726ACE295FcA5b27f0B9f6986157a19FA41F0",
     "AVAXTEST":"0x142726ACE295FcA5b27f0B9f6986157a19FA41F0"
   }
 
-  const supportedChains=["BNBTEST","FTMTEST","AVAXTEST"]
+  const supportedChains=["BNBTEST","FTMTEST","AVAXTEST","ETHGOERLI"]
 
   const [isTestnet, setIsTestnet] = useState(true);
 
@@ -88,6 +89,9 @@ export default function DFAXDeployer({}) {
       return acc;
     }, {})
   );
+
+  const [signPayload, setSignPayload] = useState({});
+
 
   const [chain, setChain] = useState("BNBTEST");
 
@@ -651,10 +655,13 @@ export default function DFAXDeployer({}) {
       }}
     >
 
+// render by testnetOptions loop
+      {testnetOptions.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
 
-      <option value={"AVAXTEST"}>Avalanche Testnet</option>
-      <option value={"BNBTEST"}>BNB Testnet</option>
-      <option value={"FTMTEST"}>Fantom Testnet</option>
     </select>
 
       
@@ -691,7 +698,7 @@ function DestChainForm({ isTestnet, destchainInfo, setDestchainInfo }) {
         }}
         placeholder="Destination Chain Token Address"
       ></input> */}
-    <div className={styles.text_container}>Dest Chain Token Address {index+1} (Computed): {computedAddress[chainInfo[0]]}
+    <div className={styles.text_container}>Dest Chain Token {index+1} 
     </div>
       
 
@@ -719,7 +726,7 @@ function DestChainForm({ isTestnet, destchainInfo, setDestchainInfo }) {
 
 
   return (
-    <div>
+    <>
     <div className={styles.nft_gallery}>
       <div className={styles.inputs_container}>
         {/* a display message introducing the product */}
@@ -754,16 +761,7 @@ function DestChainForm({ isTestnet, destchainInfo, setDestchainInfo }) {
           <ChainSelect chain={chain} setChain={setChain} isTestnet={isTestnet}/>
         </div>
 
-        <div className={styles.logo_container}>
-          <input
-            value={logoUrl}
-            onChange={(e) => {
-              setLogoUrl(e.target.value);
-            }}
-            placeholder="TOKEN LOGO URL"
-          ></input>
-
-        </div>
+      
         
 
 
@@ -806,7 +804,16 @@ function DestChainForm({ isTestnet, destchainInfo, setDestchainInfo }) {
               }}
             >Reset Destination Chains
 </button> */}
+  <div className={styles.logo_container}>
+          <input
+            value={logoUrl}
+            onChange={(e) => {
+              setLogoUrl(e.target.value);
+            }}
+            placeholder="TOKEN LOGO URL"
+          ></input>
 
+        </div>
         {/* Testnet? */}
         <div className={styles.radios_container}>
           <label>
@@ -840,8 +847,8 @@ function DestChainForm({ isTestnet, destchainInfo, setDestchainInfo }) {
         {/* if theres repeating source chain and destchain */}
 
 
-        <TransactionButton providerDict={providerDict} setStatus={setStatus}  chain={chain} deployeraddress={address} tokenaddress={tokenAddress} salt={salt} destchainInfo={destchainInfo} computedAddress={computedAddress} isDeployedByChain={isDeployedByChain} setIsDeployedByChain={setIsDeployedByChain}/ >
-        
+        <TransactionButton providerDict={providerDict} setStatus={setStatus}  chain={chain} deployeraddress={address} tokenaddress={tokenAddress} salt={salt} destchainInfo={destchainInfo} computedAddress={computedAddress} isDeployedByChain={isDeployedByChain} setIsDeployedByChain={setIsDeployedByChain} setSignPayload={setSignPayload}/ >
+        <SubmitConfigButton signPayload={signPayload} setStatus={setStatus}/>
         {/* status */}
         <div className={`${styles.status} ${status.includes('...') ? styles.flashingeffect : ''}`}>
 
@@ -854,10 +861,10 @@ function DestChainForm({ isTestnet, destchainInfo, setDestchainInfo }) {
 
     </div>
 
-    <div>
+    <>
     <InfoBox isDeployedByChain={isDeployedByChain} chain={chain} computedAddress={computedAddress} sourceChainBridge={sourceChainBridge} tokenAddress={tokenAddress} destchainInfo={destchainInfo}/>
-    </div>
-    </div>
+    </>
+    </>
   );
 }
 

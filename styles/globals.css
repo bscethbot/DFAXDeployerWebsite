@@ -16,8 +16,14 @@ p{
 }
 
 a {
-	color: inherit;
-	text-decoration: none;
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+a:hover {
+    color: #0056b3;
+    text-decoration: underline;
 }
 
 * {
@@ -25,6 +31,12 @@ a {
 	padding: 0;
 	margin: 0;
 }
+
+/* link */
+
+/* div{
+
+} */
 
 @media (prefers-color-scheme: dark) {
 	html {
